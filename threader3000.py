@@ -23,6 +23,13 @@ from datetime import datetime
 # Start Threader3000 with clear terminal
 # subprocess.call('clear', shell=True)
 
+def printBanner():
+    print("-" * 60)
+    print("        Threader 3000 - Multi-threaded Port Scanner       ")
+    print("                       Version 1.0.6c                     ")
+    print("      A project by The Mayor (cli fork by TuxTheXplorer)  ")
+    print("-" * 60)
+
 # Main Function
 def main(argv):
     socket.setdefaulttimeout(0.30)
@@ -30,16 +37,42 @@ def main(argv):
     discovered_ports = []
 
 # Welcome Banner
-    print("-" * 60)
-    print("        Threader 3000 - Multi-threaded Port Scanner       ")
-    print("                       Version 1.0.6.c                    ")
-    print("      A project by The Mayor (cli fork by TuxTheXplorer)  ")
-    print("-" * 60)
-    
     # Take input as a command line argument instead of reading in from stdin
     # target = input("Enter your target IP address or URL here: ")
-   
+    target = ''
+    usage = "usage: threader3000.py -u <Target-IP> -t <Thread-count>"
     error = ("Invalid Input")
+
+    # Set default thread Count to 200
+    threadCount = 200
+
+
+    # CLI argument implementation
+    '''
+        TO-DO:
+         - DONE: Add thread count
+         - Add nmap output dirName
+         - Tidy automate() function
+         - Add nmap toggle
+         - Tidy long format
+    '''
+    try:
+        opts, args = getopt.getopt(argv, "hu:t:",["--help","ip=", "--thread"])
+    except getopt.GetoptError:
+        print(usage)
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            print(usage)
+            sys.exit()
+        elif opt in ('-u'):
+            target = arg
+        elif opt in ('-t', '--thread'):
+            print(opts, args)
+            threadCount = int(arg)
+
+    # Print banner here, instead of at the beginning
+    printBanner()
     try:
         t_ip = socket.gethostbyname(target)
     except (UnboundLocalError, socket.gaierror):
@@ -75,8 +108,8 @@ def main(argv):
     q = Queue()
      
     #startTime = time.time()
-     
-    for x in range(200):
+    
+    for x in range(threadCount):
        t = threading.Thread(target = threader)
        t.daemon = True
        t.start()
@@ -98,45 +131,45 @@ def main(argv):
     t3 = datetime.now()
     total1 = t3 - t1
 
-##Nmap Integration (in progress)
-#
-#    def automate():
-#       choice = '0'
-#       while choice =='0':
-#          print("Would you like to run Nmap or quit to terminal?")
-#          print("-" * 60)
-#          print("1 = Run suggested Nmap scan")
-#          print("2 = Run another Threader3000 scan")
-#          print("3 = Exit to terminal")
-#          print("-" * 60)
-#          choice = input("Option Selection: ")
-#          if choice == "1":
-#             try:
-#                print(outfile)
-#                os.mkdir(target)
-#                os.chdir(target)
-#                os.system(outfile)
-#                #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
-#                #convert = "xsltproc "+target+".xml -o "+target+".html"
-#                #os.system(convert)
-#                t3 = datetime.now()
-#                total1 = t3 - t1
-#                print("-" * 60)
-#                print("Combined scan completed in "+str(total1))
-#                print("Press enter to quit...")
-#                input()
-#             except FileExistsError as e:
-#                print(e)
-#                exit()
-#          elif choice =="2":
-#             main()
-#          elif choice =="3":
-#             sys.exit()
-#          else:
-#             print("Please make a valid selection")
-#             automate()
-#    automate()
-#
+#Nmap Integration (in progress)
+
+    def automate():
+       choice = '0'
+       while choice =='0':
+          print("Would you like to run Nmap or quit to terminal?")
+          print("-" * 60)
+          print("1 = Run suggested Nmap scan")
+          print("2 = Run another Threader3000 scan")
+          print("3 = Exit to terminal")
+          print("-" * 60)
+          choice = input("Option Selection: ")
+          if choice == "1":
+             try:
+                print(outfile)
+                os.mkdir(target)
+                os.chdir(target)
+                os.system(outfile)
+                #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
+                #convert = "xsltproc "+target+".xml -o "+target+".html"
+                #os.system(convert)
+                t3 = datetime.now()
+                total1 = t3 - t1
+                print("-" * 60)
+                print("Combined scan completed in "+str(total1))
+                print("Press enter to quit...")
+                input()
+             except FileExistsError as e:
+                print(e)
+                exit()
+          elif choice =="2":
+             main(sys.argv[1:])
+          elif choice =="3":
+             sys.exit()
+          else:
+             print("Please make a valid selection")
+             automate()
+    automate()
+
 if __name__ == '__main__':
     try:
         main(sys.argv[1:])
