@@ -4,6 +4,9 @@
 # v1.0.6
 # https://github.com/dievus/threader3000
 # Licensed under GNU GPLv3 Standards.  https://www.gnu.org/licenses/gpl-3.0.en.html
+#
+# Single line cli mode by TuxTheXplorer
+# https://github.com/TuxTheXplorer/threader3000
 
 
 import socket
@@ -13,26 +16,29 @@ import time
 import threading
 import sys
 import subprocess
+import getopt
 from queue import Queue
 from datetime import datetime
 
 # Start Threader3000 with clear terminal
-subprocess.call('clear', shell=True)
+# subprocess.call('clear', shell=True)
 
 # Main Function
-def main():
+def main(argv):
     socket.setdefaulttimeout(0.30)
     print_lock = threading.Lock()
     discovered_ports = []
 
 # Welcome Banner
     print("-" * 60)
-    print("        Threader 3000 - Multi-threaded Port Scanner          ")
-    print("                       Version 1.0.6                    ")
-    print("                   A project by The Mayor               ")
+    print("        Threader 3000 - Multi-threaded Port Scanner       ")
+    print("                       Version 1.0.6.c                    ")
+    print("      A project by The Mayor (cli fork by TuxTheXplorer)  ")
     print("-" * 60)
-    time.sleep(1)
-    target = input("Enter your target IP address or URL here: ")
+    
+    # Take input as a command line argument instead of reading in from stdin
+    # target = input("Enter your target IP address or URL here: ")
+   
     error = ("Invalid Input")
     try:
         t_ip = socket.gethostbyname(target)
@@ -92,48 +98,48 @@ def main():
     t3 = datetime.now()
     total1 = t3 - t1
 
-#Nmap Integration (in progress)
-
-    def automate():
-       choice = '0'
-       while choice =='0':
-          print("Would you like to run Nmap or quit to terminal?")
-          print("-" * 60)
-          print("1 = Run suggested Nmap scan")
-          print("2 = Run another Threader3000 scan")
-          print("3 = Exit to terminal")
-          print("-" * 60)
-          choice = input("Option Selection: ")
-          if choice == "1":
-             try:
-                print(outfile)
-                os.mkdir(target)
-                os.chdir(target)
-                os.system(outfile)
-                #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
-                #convert = "xsltproc "+target+".xml -o "+target+".html"
-                #os.system(convert)
-                t3 = datetime.now()
-                total1 = t3 - t1
-                print("-" * 60)
-                print("Combined scan completed in "+str(total1))
-                print("Press enter to quit...")
-                input()
-             except FileExistsError as e:
-                print(e)
-                exit()
-          elif choice =="2":
-             main()
-          elif choice =="3":
-             sys.exit()
-          else:
-             print("Please make a valid selection")
-             automate()
-    automate()
-
+##Nmap Integration (in progress)
+#
+#    def automate():
+#       choice = '0'
+#       while choice =='0':
+#          print("Would you like to run Nmap or quit to terminal?")
+#          print("-" * 60)
+#          print("1 = Run suggested Nmap scan")
+#          print("2 = Run another Threader3000 scan")
+#          print("3 = Exit to terminal")
+#          print("-" * 60)
+#          choice = input("Option Selection: ")
+#          if choice == "1":
+#             try:
+#                print(outfile)
+#                os.mkdir(target)
+#                os.chdir(target)
+#                os.system(outfile)
+#                #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
+#                #convert = "xsltproc "+target+".xml -o "+target+".html"
+#                #os.system(convert)
+#                t3 = datetime.now()
+#                total1 = t3 - t1
+#                print("-" * 60)
+#                print("Combined scan completed in "+str(total1))
+#                print("Press enter to quit...")
+#                input()
+#             except FileExistsError as e:
+#                print(e)
+#                exit()
+#          elif choice =="2":
+#             main()
+#          elif choice =="3":
+#             sys.exit()
+#          else:
+#             print("Please make a valid selection")
+#             automate()
+#    automate()
+#
 if __name__ == '__main__':
     try:
-        main()
+        main(sys.argv[1:])
     except KeyboardInterrupt:
         print("\nGoodbye!")
         quit()
