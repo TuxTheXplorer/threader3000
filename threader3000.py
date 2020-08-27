@@ -23,12 +23,13 @@ from datetime import datetime
 # Start Threader3000 with clear terminal
 # subprocess.call('clear', shell=True)
 
-def printBanner():
-    print("-" * 60)
-    print("        Threader 3000 - Multi-threaded Port Scanner       ")
-    print("                       Version 1.0.6c                     ")
-    print("      A project by The Mayor (cli fork by TuxTheXplorer)  ")
-    print("-" * 60)
+def printBanner(printFlag):
+    if printFlag:
+        print("-" * 60)
+        print("        Threader 3000 - Multi-threaded Port Scanner       ")
+        print("                       Version 1.0.6c                     ")
+        print("      A project by The Mayor (cli fork by TuxTheXplorer)  ")
+        print("-" * 60)
 
 # Main Function
 def main(argv):
@@ -43,36 +44,63 @@ def main(argv):
     usage = "usage: threader3000.py -u <Target-IP> -t <Thread-count>"
     error = ("Invalid Input")
 
-    # Set default thread Count to 200
+    # Set default values
     threadCount = 200
-
+    printBMsg = True
+    ruNmap = False
 
     # CLI argument implementation
     '''
         TO-DO:
-         - DONE: Add thread count
-         - Add nmap output dirName
+         - Add nmap output dirName (--output)
          - Tidy automate() function
-         - Add nmap toggle
+         - Add nmap toggle (--scan)
          - Tidy long format
+         - Quiet option (--quiet)
+         - Interactive toggle (--interactive)
     '''
+
+    # Command line argument handler
     try:
-        opts, args = getopt.getopt(argv, "hu:t:",["--help","ip=", "--thread"])
+        opts, args = getopt.getopt(argv, "hu:t:iqso",["--help","--ip", "--thread", "--interactive", "--quiet", "--scan", "--output"])
     except getopt.GetoptError:
         print(usage)
         sys.exit(2)
-    for opt, arg in opts:
-        if opt in ('-h', '--help'):
+
+    # Check is no arguments have been submitted
+    if len(opts) == 0:
+        # Checks if only one argument (probably IP)
+        # was given and run threader on it.
+        # REWRITE THIS TO ENABLE parsing of other args
+        if len(argv) == 1:
+            target = argv[0]
+        else:
             print(usage)
-            sys.exit()
-        elif opt in ('-u'):
-            target = arg
-        elif opt in ('-t', '--thread'):
-            print(opts, args)
-            threadCount = int(arg)
+            sys.exit(2)
+    else:
+        for opt, arg in opts:
+            if opt in ('-h', '--help'):
+                print(usage)
+                sys.exit()
+            elif opt in ('-u'):
+                target = arg
+            elif opt in ('-t', '--thread'):
+                print(opts, args)
+                threadCount = int(arg)
+            elif opt in ('-q', '--quiet'):
+                printBMsg = False
+            elif opt in ('-i', '--interactive'):
+            # Add vanilla threader here
+            # Import it from orignial script OOB style
+                pass
+            elif opt in ('-s', '--scan'):
+                ruNmap = True
+            elif opt in ('-o', '--output'):
+                pass
+
 
     # Print banner here, instead of at the beginning
-    printBanner()
+    printBanner(printBMsg)
     try:
         t_ip = socket.gethostbyname(target)
     except (UnboundLocalError, socket.gaierror):
@@ -132,43 +160,45 @@ def main(argv):
     total1 = t3 - t1
 
 #Nmap Integration (in progress)
-
-    def automate():
-       choice = '0'
-       while choice =='0':
-          print("Would you like to run Nmap or quit to terminal?")
-          print("-" * 60)
-          print("1 = Run suggested Nmap scan")
-          print("2 = Run another Threader3000 scan")
-          print("3 = Exit to terminal")
-          print("-" * 60)
-          choice = input("Option Selection: ")
-          if choice == "1":
-             try:
-                print(outfile)
-                os.mkdir(target)
-                os.chdir(target)
-                os.system(outfile)
-                #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
-                #convert = "xsltproc "+target+".xml -o "+target+".html"
-                #os.system(convert)
-                t3 = datetime.now()
-                total1 = t3 - t1
-                print("-" * 60)
-                print("Combined scan completed in "+str(total1))
-                print("Press enter to quit...")
-                input()
-             except FileExistsError as e:
-                print(e)
-                exit()
-          elif choice =="2":
-             main(sys.argv[1:])
-          elif choice =="3":
-             sys.exit()
-          else:
-             print("Please make a valid selection")
-             automate()
-    automate()
+#    def automate():
+#        choice = '0'
+#       while choice == '0':
+#        #if not ruNmap: 
+#            print("Would you like to run Nmap or quit to terminal?")
+#            print("-" * 60)
+#            print("1 = Run suggested Nmap scan")
+#            print("2 = Run another Threader3000 scan")
+#            print("3 = Exit to terminal")
+#            print("-" * 60)
+#            choice = input("Option Selection: ")
+#            if choice == "1":
+#                try:
+#                   print(outfile)
+#                   os.mkdir(target)
+#                   os.chdir(target)
+#                   os.system(outfile)
+#                   #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
+#                   #convert = "xsltproc "+target+".xml -o "+target+".html"
+#                   #os.system(convert)
+#                   t3 = datetime.now()
+#                   total1 = t3 - t1
+#                   print("-" * 60)
+#                   print("Combined scan completed in "+str(total1))
+#                   print("Press enter to quit...")
+#                   input()
+#                except FileExistsError as e:
+#                   print(e)
+#                   exit()
+#            elif choice =="2":
+#                main(sys.argv[1:])
+#            elif choice =="3":
+#                sys.exit()
+#            else:
+#                print("Please make a valid selection")
+#                automate()
+#        #else:
+#        #   choice = '2'
+#    automate()
 
 if __name__ == '__main__':
     try:
