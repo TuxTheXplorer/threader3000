@@ -40,7 +40,6 @@ def printHelp():
     print("    -u, --ip             Set target IP")
     print("    -i, --interactive    Run the original threader3000 program")
     print("    -s, --scan           Automatically run nmap on open ports")
-    print("    -o, --output         Change name of nmap output directory")
 
 # Main Function
 def main(argv):
@@ -50,7 +49,7 @@ def main(argv):
 
     # Setting default values for variables
     target = ""
-    usage = "Usage: threader3000.py -u <Target-IP>"
+    usage = "Usage: threader3000.py -u <Target-IP> [options]"
     threadCount = 200
     printBMsg = True
     ruNmap = False
@@ -58,37 +57,48 @@ def main(argv):
     # CLI argument implementation
     '''
         TO-DO:
-         - Add nmap output dirName (--output)
-         - Tidy automate() function
-         - Add nmap toggle (--scan)
-         - Detect no arguments and run scan (if IP is present)
+         - Fix long options
          - Detect invalid values within options and print error message accordingly
     '''
 
     # Command line argument handler
     try:
-        opts, args = getopt.getopt(argv, "hu:t:iqso",["--help","--ip", "--thread", "--interactive", "--quiet", "--scan", "--output"])
+        opts, args = getopt.getopt(argv, "hu:t:iqs",["--help","--ip", "--thread", "--interactive", "--quiet", "--scan"])
     except getopt.GetoptError:
         print(usage)
         sys.exit(2)
 
     # Check is no arguments have been submitted
-    if len(opts) == 0:
-        # Checks if only one argument (probably IP)
-        # was given and run threader on it.
-        # REWRITE THIS TO ENABLE parsing of other args
-        if len(argv) == 1:
-            target = argv[0]
-        else:
-            print(usage)
-            sys.exit(2)
-    else:
+    if len(argv) == 0:
+        print(usage)
+        sys.exit()
+
+    elif len(argv) >= 1:
+        # This works don't touch it
+        if len(opts) == 0:
+            argv.insert(0,'-u')
+            opts, args = getopt.getopt(argv, "hu:t:iqs",["--help","--ip", "--thread", "--interactive", "--quiet", "--scan"])
+
+        # Filter input
+        # In case there is a single argument passed
+        if len(opts) == 1:
+            #print(opts[0][0])
+            if opts[0][0] not in ('-h', '-i', '-t', '-q', '-u', '-s'):
+                target = argv[0]
+
+            elif opts[0][0] in ('-i'):
+                threaderOriginal()
+            else:
+                pass
+            
+        # This behaves a bit oddly. Long options don't work.
         for opt, arg in opts:
-            if opt in ('-h', '--help'):
+            #print(opt)
+            if opt in ('-h', "--help"):
                 printHelp()
                 sys.exit()
 
-            elif opt in ('-u'):
+            elif opt in ('-u', '--ip'):
                 target = arg
 
             elif opt in ('-t', '--thread'):
@@ -107,9 +117,9 @@ def main(argv):
 
             elif opt in ('-s', '--scan'):
                 ruNmap = True
-
-            elif opt in ('-o', '--output'):
-                pass
+    else:
+        print(usage)
+        sys.exit(2)
 
     # Print banner here, instead of at the beginning
     printBanner(printBMsg)
@@ -164,13 +174,34 @@ def main(argv):
     total = t2 - t1
     print("Port scan completed in "+str(total))
     print("-" * 60)
-    print("\nThreader3000 recommends the following Nmap scan:")
-    print("*" * 60)
-    print("nmap -p{ports} -sV -sC -T4 -Pn -oA {ip} {ip}".format(ports=",".join(discovered_ports), ip=target))
-    print("*" * 60)
+
+    if not ruNmap:
+        print("\nThreader3000 recommends the following Nmap scan:")
+        print("*" * 60)
+        print("nmap -p{ports} -sV -sC -T4 -Pn -oA {ip} {ip}".format(ports=",".join(discovered_ports), ip=target))
+        print("*" * 60)
     outfile = "nmap -p{ports} -sV -sC -Pn -T4 -oA {ip} {ip}".format(ports=",".join(discovered_ports), ip=target)
     t3 = datetime.now()
     total1 = t3 - t1
+
+
+    def nmapScan():
+        try:
+           print(outfile)
+           os.mkdir(target)
+           os.chdir(target)
+           os.system(outfile)
+           #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
+           #convert = "xsltproc "+target+".xml -o "+target+".html"
+           #os.system(convert)
+           t3 = datetime.now()
+           total1 = t3 - t1
+           print("-" * 60)
+           print("Combined scan completed in "+str(total1))
+           sys.exit(0)
+        except FileExistsError as e:
+           print(e)
+           sys.exit()
 
 #Nmap Integration (in progress)
     def automate():
@@ -185,32 +216,17 @@ def main(argv):
                 print("-" * 60)
                 choice = input("Option Selection: ")
                 if choice == "1":
-                    try:
-                       print(outfile)
-                       os.mkdir(target)
-                       os.chdir(target)
-                       os.system(outfile)
-                       #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
-                       #convert = "xsltproc "+target+".xml -o "+target+".html"
-                       #os.system(convert)
-                       t3 = datetime.now()
-                       total1 = t3 - t1
-                       print("-" * 60)
-                       print("Combined scan completed in "+str(total1))
-                       print("Press enter to quit...")
-                       input()
-                    except FileExistsError as e:
-                       print(e)
-                       exit()
-                elif choice =="2":
+                    nmapScan()
+                elif choice == "2":
                     main(sys.argv[1:])
-                elif choice =="3":
+                elif choice == "3":
                     sys.exit()
                 else:
                     print("Please make a valid selection")
                     automate()
             else:
-               choice = '1'
+                print("You choose to run nmap automatically")
+                nmapScan()
     automate()
 
 if __name__ == '__main__':
