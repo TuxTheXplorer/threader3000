@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 # Threader3000 - Multi-threader Port Scanner
-# A project by The Mayor
-# v1.0.6
+# A project by The Mayor 
+# v1.0.6c
 # https://github.com/dievus/threader3000
 # Licensed under GNU GPLv3 Standards.  https://www.gnu.org/licenses/gpl-3.0.en.html
 #
 # Single line cli mode by TuxTheXplorer
 # https://github.com/TuxTheXplorer/threader3000
-
 
 import socket
 import os
@@ -19,10 +18,10 @@ import subprocess
 import getopt
 from queue import Queue
 from datetime import datetime
+from vanillaThreader import threaderOriginal
 
-# Start Threader3000 with clear terminal
-# subprocess.call('clear', shell=True)
-
+# Banner to show when running threader3000
+# Controlled by the "printFlag" variable
 def printBanner(printFlag):
     if printFlag:
         print("-" * 60)
@@ -31,20 +30,27 @@ def printBanner(printFlag):
         print("      A project by The Mayor (cli fork by TuxTheXplorer)  ")
         print("-" * 60)
 
+# Extended help menu
+def printHelp():
+    print("Usage: threader3000.py [options]")
+    print("  options:")
+    print("    -h, --help           Print this help message")
+    print("    -q, --quiet          Hide banner when running")
+    print("    -t, --thread         Set thread count")
+    print("    -u, --ip             Set target IP")
+    print("    -i, --interactive    Run the original threader3000 program")
+    print("    -s, --scan           Automatically run nmap on open ports")
+    print("    -o, --output         Change name of nmap output directory")
+
 # Main Function
 def main(argv):
     socket.setdefaulttimeout(0.30)
     print_lock = threading.Lock()
     discovered_ports = []
 
-# Welcome Banner
-    # Take input as a command line argument instead of reading in from stdin
-    # target = input("Enter your target IP address or URL here: ")
-    target = ''
-    usage = "usage: threader3000.py -u <Target-IP> -t <Thread-count>"
-    error = ("Invalid Input")
-
-    # Set default values
+    # Setting default values for variables
+    target = ""
+    usage = "Usage: threader3000.py -u <Target-IP>"
     threadCount = 200
     printBMsg = True
     ruNmap = False
@@ -55,9 +61,8 @@ def main(argv):
          - Add nmap output dirName (--output)
          - Tidy automate() function
          - Add nmap toggle (--scan)
-         - Tidy long format
-         - Quiet option (--quiet)
-         - Interactive toggle (--interactive)
+         - Detect no arguments and run scan (if IP is present)
+         - Detect invalid values within options and print error message accordingly
     '''
 
     # Command line argument handler
@@ -80,24 +85,31 @@ def main(argv):
     else:
         for opt, arg in opts:
             if opt in ('-h', '--help'):
-                print(usage)
+                printHelp()
                 sys.exit()
+
             elif opt in ('-u'):
                 target = arg
+
             elif opt in ('-t', '--thread'):
-                print(opts, args)
                 threadCount = int(arg)
+
             elif opt in ('-q', '--quiet'):
                 printBMsg = False
+
             elif opt in ('-i', '--interactive'):
-            # Add vanilla threader here
-            # Import it from orignial script OOB style
-                pass
+                if len(opt) > 1:
+                    print("Interactive mode is meant to be standalone.")
+                    print("No need to supply any other arguments with -i")
+                    sys.exit()
+                else:
+                    threaderOriginal()
+
             elif opt in ('-s', '--scan'):
                 ruNmap = True
+
             elif opt in ('-o', '--output'):
                 pass
-
 
     # Print banner here, instead of at the beginning
     printBanner(printBMsg)
@@ -106,7 +118,8 @@ def main(argv):
     except (UnboundLocalError, socket.gaierror):
         print("\n[-]Invalid format. Please use a correct IP or web address[-]\n")
         sys.exit()
-    #Banner
+
+    # Small banner (target & time)
     print("-" * 60)
     print("Scanning target "+ t_ip)
     print("Time started: "+ str(datetime.now()))
@@ -151,7 +164,7 @@ def main(argv):
     total = t2 - t1
     print("Port scan completed in "+str(total))
     print("-" * 60)
-    print("Threader3000 recommends the following Nmap scan:")
+    print("\nThreader3000 recommends the following Nmap scan:")
     print("*" * 60)
     print("nmap -p{ports} -sV -sC -T4 -Pn -oA {ip} {ip}".format(ports=",".join(discovered_ports), ip=target))
     print("*" * 60)
@@ -160,45 +173,45 @@ def main(argv):
     total1 = t3 - t1
 
 #Nmap Integration (in progress)
-#    def automate():
-#        choice = '0'
-#       while choice == '0':
-#        #if not ruNmap: 
-#            print("Would you like to run Nmap or quit to terminal?")
-#            print("-" * 60)
-#            print("1 = Run suggested Nmap scan")
-#            print("2 = Run another Threader3000 scan")
-#            print("3 = Exit to terminal")
-#            print("-" * 60)
-#            choice = input("Option Selection: ")
-#            if choice == "1":
-#                try:
-#                   print(outfile)
-#                   os.mkdir(target)
-#                   os.chdir(target)
-#                   os.system(outfile)
-#                   #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
-#                   #convert = "xsltproc "+target+".xml -o "+target+".html"
-#                   #os.system(convert)
-#                   t3 = datetime.now()
-#                   total1 = t3 - t1
-#                   print("-" * 60)
-#                   print("Combined scan completed in "+str(total1))
-#                   print("Press enter to quit...")
-#                   input()
-#                except FileExistsError as e:
-#                   print(e)
-#                   exit()
-#            elif choice =="2":
-#                main(sys.argv[1:])
-#            elif choice =="3":
-#                sys.exit()
-#            else:
-#                print("Please make a valid selection")
-#                automate()
-#        #else:
-#        #   choice = '2'
-#    automate()
+    def automate():
+        choice = '0'
+        while choice == '0':
+            if not ruNmap: 
+                print("Would you like to run Nmap or quit to terminal?")
+                print("-" * 60)
+                print("1 = Run suggested Nmap scan")
+                print("2 = Run another Threader3000 scan")
+                print("3 = Exit to terminal")
+                print("-" * 60)
+                choice = input("Option Selection: ")
+                if choice == "1":
+                    try:
+                       print(outfile)
+                       os.mkdir(target)
+                       os.chdir(target)
+                       os.system(outfile)
+                       #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
+                       #convert = "xsltproc "+target+".xml -o "+target+".html"
+                       #os.system(convert)
+                       t3 = datetime.now()
+                       total1 = t3 - t1
+                       print("-" * 60)
+                       print("Combined scan completed in "+str(total1))
+                       print("Press enter to quit...")
+                       input()
+                    except FileExistsError as e:
+                       print(e)
+                       exit()
+                elif choice =="2":
+                    main(sys.argv[1:])
+                elif choice =="3":
+                    sys.exit()
+                else:
+                    print("Please make a valid selection")
+                    automate()
+            else:
+               choice = '1'
+    automate()
 
 if __name__ == '__main__':
     try:
