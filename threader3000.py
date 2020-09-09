@@ -34,12 +34,12 @@ def printBanner(printFlag):
 def printHelp():
     print("Usage: threader3000.py [options]")
     print("  options:")
-    print("    -h, --help           Print this help message")
-    print("    -q, --quiet          Hide banner when running")
-    print("    -t, --thread         Set thread count")
-    print("    -u, --ip             Set target IP")
-    print("    -i, --interactive    Run the original threader3000 program")
-    print("    -s, --scan           Automatically run nmap on open ports")
+    print("    -h,    Print this help message")
+    print("    -q,    Hide banner when running")
+    print("    -t,    Set thread count")
+    print("    -u,    Set target IP")
+    print("    -i,    Run the original threader3000 program")
+    print("    -s,    Automatically run nmap on open ports")
 
 # Main Function
 def main(argv):
@@ -77,7 +77,7 @@ def main(argv):
         # This works don't touch it
         if len(opts) == 0:
             argv.insert(0,'-u')
-            opts, args = getopt.getopt(argv, "hu:t:iqs",["--help","--ip", "--thread", "--interactive", "--quiet", "--scan"])
+            opts, args = getopt.getopt(argv, "hu:t:iqs")
 
         # Filter input
         # In case there is a single argument passed
@@ -94,20 +94,20 @@ def main(argv):
         # This behaves a bit oddly. Long options don't work.
         for opt, arg in opts:
             #print(opt)
-            if opt in ('-h', "--help"):
+            if opt in ('-h'):
                 printHelp()
                 sys.exit()
 
-            elif opt in ('-u', '--ip'):
+            elif opt in ('-u'):
                 target = arg
 
-            elif opt in ('-t', '--thread'):
+            elif opt in ('-t'):
                 threadCount = int(arg)
 
-            elif opt in ('-q', '--quiet'):
+            elif opt in ('-q'):
                 printBMsg = False
 
-            elif opt in ('-i', '--interactive'):
+            elif opt in ('-i'):
                 if len(opt) > 1:
                     print("Interactive mode is meant to be standalone.")
                     print("No need to supply any other arguments with -i")
@@ -115,7 +115,7 @@ def main(argv):
                 else:
                     threaderOriginal()
 
-            elif opt in ('-s', '--scan'):
+            elif opt in ('-s'):
                 ruNmap = True
     else:
         print(usage)
