@@ -57,13 +57,12 @@ def main(argv):
     # CLI argument implementation
     '''
         TO-DO:
-         - Fix long options
-         - Detect invalid values within options and print error message accordingly
+        - Detect invalid values within options and print error message accordingly
     '''
 
     # Command line argument handler
     try:
-        opts, args = getopt.getopt(argv, "hu:t:iqs",["--help","--ip", "--thread", "--interactive", "--quiet", "--scan"])
+        opts, args = getopt.getopt(argv, "hu:t:iqs")
     except getopt.GetoptError:
         print(usage)
         sys.exit(2)
