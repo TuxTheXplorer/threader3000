@@ -30,6 +30,18 @@ You can add Threader6000 to run from any directory by adding a symbolic link:
 sudo ln -s $(pwd)/threader6000.py /usr/local/bin/threader6000
 ```
 
+## Command line options
+```
+Usage: threader6000.py <IP> or -f hosts.txt [options]
+    -h,    Print this help message
+    -q,    Hide banner when running
+    -t,    Set thread count
+    -u,    Set target IP
+    -f,    Iterate through lsit of targets from file
+    -i,    Run the original threader3000 program
+    -s,    Automatically run nmap on open ports
+```
+
 ## Examples
 - `threader6000.py 127.0.0.1`
 - `threader6000.py -u 127.0.0.1 -q`
