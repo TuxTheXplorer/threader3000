@@ -8,10 +8,7 @@ Python3 must be installed on your system in order to function
 Pip3 for installation via PyPi repository
 
 ## Installation
-** Installation via Pip (Not yet available - please install via git)**
-```
-pip3 install threader6000 
-```
+**Installation via Pip (Not yet available - please install via git)**
 
 ```bash 
 pip3 install threader6000
@@ -32,6 +29,12 @@ You can add Threader6000 to run from any directory by adding a symbolic link:
 ```bash
 sudo ln -s $(pwd)/threader6000.py /usr/local/bin/threader6000
 ```
+
+## Examples
+`threader6000.py 127.0.0.1`
+`threader6000.py -u 127.0.0.1 -q`
+`threader6000.py -u 127.0.0.1 -t 500 -q`
+`threader6000.py -t 250 -f host_list.txt`
 
 ## FAQ
 
