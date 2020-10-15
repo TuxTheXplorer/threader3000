@@ -1,12 +1,12 @@
 #!/usr/bin/python3
-# Threader3000 - Multi-threader Port Scanner
-# A project by The Mayor 
-# v1.0.6c
-# https://github.com/dievus/threader3000
+# Threader6000 - Multi-threader Port Scanner optimized for command line scripting
+# A project by TuxTheXplorer 
+# v1.0.6tux
+# https://github.com/TuxTheXplorer/threader3000
 # Licensed under GNU GPLv3 Standards.  https://www.gnu.org/licenses/gpl-3.0.en.html
 #
-# Single line cli mode by TuxTheXplorer
-# https://github.com/TuxTheXplorer/threader3000
+# Original project by The Mayor
+# https://github.com/dievus/threader3000
 
 import socket
 import os
@@ -20,19 +20,20 @@ from queue import Queue
 from datetime import datetime
 from vanillaThreader import threaderOriginal
 
-# Banner to show when running threader3000
+# Banner to show when running threader6000
 # Controlled by the "printFlag" variable
 def printBanner(printFlag):
     if printFlag:
         print("-" * 60)
-        print("        Threader 3000 - Multi-threaded Port Scanner       ")
-        print("                       Version 1.0.6c2                    ")
-        print("      A project by The Mayor (cli fork by TuxTheXplorer)  ")
+        print("         Threader 6000 - Multi-threaded Port Scanner      ")
+        print("                       Version 1.0.6tux                   ")
+        print("                  A project by TuxTheXplorer              ")
+        print("                 Original threader by The Mayor           ")
         print("-" * 60)
 
 # Extended help menu
 def printHelp():
-    print("Usage: threader3000.py <IP> or -f hosts.txt [options]")
+    print("Usage: threader6000.py <IP> or -f hosts.txt [options]")
     print("  options:")
     print("    -h,    Print this help message")
     print("    -q,    Hide banner when running")
@@ -52,7 +53,7 @@ def readFromFile(filename, tc):
 
         # Currently Setting the threadcount only works if it's set
         # before "-f input.txt". Not the other way around.
-        # threader3000.py -t 250 -f input.txt
+        # threader6000.py -t 250 -f input.txt
 
         for line in file:
             target = line.rstrip()
@@ -152,7 +153,7 @@ def nmapScan(outfile, target):
 def main(argv):
     # Setting default values for variables
     target = ""
-    usage = "Usage: threader3000.py -u <Target-IP> [options]"
+    usage = "Usage: threader6000.py -u <Target-IP> [options]"
     threadCount = 200
     printBMsg = True
     ruNmap = False
@@ -234,7 +235,7 @@ def main(argv):
     discovered_ports = portscan(target, threadCount)
 
     if not ruNmap:
-        print("\nThreader3000 recommends the following Nmap scan:")
+        print("\nThreader6000 recommends the following Nmap scan:")
         print("*" * 60)
         print("nmap -p{ports} -sV -sC -T4 -Pn -oA {ip} {ip}".format(ports=",".join(discovered_ports), ip=target))
         print("*" * 60)
@@ -251,7 +252,7 @@ def main(argv):
                 print("Would you like to run Nmap or quit to terminal?")
                 print("-" * 60)
                 print("1 = Run suggested Nmap scan")
-                print("2 = Run another Threader3000 scan")
+                print("2 = Run another Threader6000 scan")
                 print("3 = Exit to terminal")
                 print("-" * 60)
                 choice = input("Option Selection: ")
