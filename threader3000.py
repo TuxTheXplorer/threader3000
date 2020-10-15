@@ -26,27 +26,130 @@ def printBanner(printFlag):
     if printFlag:
         print("-" * 60)
         print("        Threader 3000 - Multi-threaded Port Scanner       ")
-        print("                       Version 1.0.6c                     ")
+        print("                       Version 1.0.6c2                    ")
         print("      A project by The Mayor (cli fork by TuxTheXplorer)  ")
         print("-" * 60)
 
 # Extended help menu
 def printHelp():
-    print("Usage: threader3000.py [options]")
+    print("Usage: threader3000.py <IP> or -f hosts.txt [options]")
     print("  options:")
     print("    -h,    Print this help message")
     print("    -q,    Hide banner when running")
     print("    -t,    Set thread count")
     print("    -u,    Set target IP")
+    print("    -f,    Iterate through lsit of targets from file")
     print("    -i,    Run the original threader3000 program")
     print("    -s,    Automatically run nmap on open ports")
 
-# Main Function
-def main(argv):
+def readFromFile(filename, tc):
+    with open(filename) as file:
+        threadCount = tc
+        #print("tc =", threadCount)
+        # For every target I need to run 
+        # - portscan [returns discovered_ports]
+        # - nmap [using the returned discovered ports]
+
+        # Currently Setting the threadcount only works if it's set
+        # before "-f input.txt". Not the other way around.
+        # threader3000.py -t 250 -f input.txt
+
+        for line in file:
+            target = line.rstrip()
+            print("Starting portscan for", target)
+            portlist = portscan(target, threadCount)
+            print("Running nmap for", target)
+            outfile = "nmap -p{ports} -sV -sC -Pn -T4 -oA {ip} {ip}".format(ports=",".join(portlist), ip=target)
+            #nmapScan(outfile, target)
+
+
+###########################################
+##          The heart and souls          ##
+## Original credit to The Mayor for this ##
+###########################################
+def portscan(target, threadCount):
     socket.setdefaulttimeout(0.30)
     print_lock = threading.Lock()
     discovered_ports = []
 
+    try:
+        t_ip = socket.gethostbyname(target)
+    except (UnboundLocalError, socket.gaierror):
+        print("\n[-]Invalid format. Please use a correct IP or web address[-]\n")
+        sys.exit()
+
+    # Small banner (target & time)
+    print("-" * 60)
+    print("Scanning target "+ t_ip)
+    print("Time started: "+ str(datetime.now()))
+    print("-" * 60)
+    t1 = datetime.now()
+
+    def doTheScan(port):
+
+       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+       
+       try:
+          conx = s.connect((t_ip, port))
+          with print_lock:
+             print("Port {} is open".format(port))
+             discovered_ports.append(str(port))
+          conx.close()
+
+       except (ConnectionRefusedError, AttributeError, OSError):
+          pass
+
+    def threader():
+       while True:
+          worker = q.get()
+          doTheScan(worker)
+          q.task_done()
+      
+    q = Queue()
+     
+    #startTime = time.time()
+    
+    for x in range(threadCount):
+       t = threading.Thread(target = threader)
+       t.daemon = True
+       t.start()
+
+    for worker in range(1, 65536):
+       q.put(worker)
+
+    q.join()
+
+    # Timing end
+    t2 = datetime.now()
+    total = t2 - t1
+    print("Port scan completed in "+str(total))
+    print("-" * 60)
+    
+    return discovered_ports
+
+
+def nmapScan(outfile, target):
+    """Creates output folder and runs Nmap"""
+    # TODO: 
+    # - Handle folder creation for multiple targets
+    try:
+       print(outfile)
+       os.mkdir(target)
+       os.chdir(target)
+       os.system(outfile)
+       #t3 = datetime.now()
+       #total1 = t3 - t1
+       print("-" * 60)
+       #print("Combined scan completed in "+str(total1))
+       sys.exit(0)
+    except FileExistsError as e:
+       print(e)
+       sys.exit()
+
+#####################
+### Main Function ###
+#####################
+def main(argv):
     # Setting default values for variables
     target = ""
     usage = "Usage: threader3000.py -u <Target-IP> [options]"
@@ -54,21 +157,16 @@ def main(argv):
     printBMsg = True
     ruNmap = False
 
-    # CLI argument implementation
-    '''
-        TO-DO:
-         - Fix long options
-         - Detect invalid values within options and print error message accordingly
-    '''
-
-    # Command line argument handler
+    #################################
+    # Command line argument handler #
+    #################################
     try:
-        opts, args = getopt.getopt(argv, "hu:t:iqs",["--help","--ip", "--thread", "--interactive", "--quiet", "--scan"])
+        opts, args = getopt.getopt(argv, "hu:f:t:iqs",["--help","--ip", "--thread", "--interactive", "--quiet", "--scan"])
     except getopt.GetoptError:
         print(usage)
         sys.exit(2)
 
-    # Check is no arguments have been submitted
+    # Check if no arguments have been submitted
     if len(argv) == 0:
         print(usage)
         sys.exit()
@@ -77,13 +175,13 @@ def main(argv):
         # This works don't touch it
         if len(opts) == 0:
             argv.insert(0,'-u')
-            opts, args = getopt.getopt(argv, "hu:t:iqs")
+            opts, args = getopt.getopt(argv, "hu:f:t:iqs")
 
         # Filter input
         # In case there is a single argument passed
         if len(opts) == 1:
             #print(opts[0][0])
-            if opts[0][0] not in ('-h', '-i', '-t', '-q', '-u', '-s'):
+            if opts[0][0] not in ('-h', '-i', '-t', '-q', '-u', '-s', '-f'):
                 target = argv[0]
 
             elif opts[0][0] in ('-i'):
@@ -92,6 +190,7 @@ def main(argv):
                 pass
             
         # This behaves a bit oddly. Long options don't work.
+        # Long options have been removed for the time being
         for opt, arg in opts:
             #print(opt)
             if opt in ('-h'):
@@ -101,9 +200,17 @@ def main(argv):
             elif opt in ('-u'):
                 target = arg
 
+            elif opt in ('-f'):
+                #print("File flag set; Turning on automatic nmap mode...")
+                print("Reading target list from file:", str(arg))
+                # Hand over execution to the readFromFile() function
+                file = arg
+                readFromFile(file, threadCount)
+                exit(0)
+
             elif opt in ('-t'):
                 threadCount = int(arg)
-
+                
             elif opt in ('-q'):
                 printBMsg = False
 
@@ -121,59 +228,9 @@ def main(argv):
         print(usage)
         sys.exit(2)
 
-    # Print banner here, instead of at the beginning
+    # Scanning the ports
     printBanner(printBMsg)
-    try:
-        t_ip = socket.gethostbyname(target)
-    except (UnboundLocalError, socket.gaierror):
-        print("\n[-]Invalid format. Please use a correct IP or web address[-]\n")
-        sys.exit()
-
-    # Small banner (target & time)
-    print("-" * 60)
-    print("Scanning target "+ t_ip)
-    print("Time started: "+ str(datetime.now()))
-    print("-" * 60)
-    t1 = datetime.now()
-
-    def portscan(port):
-
-       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-       
-       try:
-          conx = s.connect((t_ip, port))
-          with print_lock:
-             print("Port {} is open".format(port))
-             discovered_ports.append(str(port))
-          conx.close()
-
-       except (ConnectionRefusedError, AttributeError, OSError):
-          pass
-
-    def threader():
-       while True:
-          worker = q.get()
-          portscan(worker)
-          q.task_done()
-      
-    q = Queue()
-     
-    #startTime = time.time()
-    
-    for x in range(threadCount):
-       t = threading.Thread(target = threader)
-       t.daemon = True
-       t.start()
-
-    for worker in range(1, 65536):
-       q.put(worker)
-
-    q.join()
-
-    t2 = datetime.now()
-    total = t2 - t1
-    print("Port scan completed in "+str(total))
-    print("-" * 60)
+    discovered_ports = portscan(target, threadCount)
 
     if not ruNmap:
         print("\nThreader3000 recommends the following Nmap scan:")
@@ -181,29 +238,11 @@ def main(argv):
         print("nmap -p{ports} -sV -sC -T4 -Pn -oA {ip} {ip}".format(ports=",".join(discovered_ports), ip=target))
         print("*" * 60)
     outfile = "nmap -p{ports} -sV -sC -Pn -T4 -oA {ip} {ip}".format(ports=",".join(discovered_ports), ip=target)
-    t3 = datetime.now()
-    total1 = t3 - t1
+    #t3 = datetime.now()
+    #total1 = t3 - t1
 
 
-    def nmapScan():
-        try:
-           print(outfile)
-           os.mkdir(target)
-           os.chdir(target)
-           os.system(outfile)
-           #The xsltproc is experimental and will convert XML to a HTML readable format; requires xsltproc on your machine to work
-           #convert = "xsltproc "+target+".xml -o "+target+".html"
-           #os.system(convert)
-           t3 = datetime.now()
-           total1 = t3 - t1
-           print("-" * 60)
-           print("Combined scan completed in "+str(total1))
-           sys.exit(0)
-        except FileExistsError as e:
-           print(e)
-           sys.exit()
-
-#Nmap Integration (in progress)
+# Automate function. 
     def automate():
         choice = '0'
         while choice == '0':
@@ -216,7 +255,7 @@ def main(argv):
                 print("-" * 60)
                 choice = input("Option Selection: ")
                 if choice == "1":
-                    nmapScan()
+                    nmapScan(outfile, target)
                 elif choice == "2":
                     main(sys.argv[1:])
                 elif choice == "3":
@@ -226,7 +265,7 @@ def main(argv):
                     automate()
             else:
                 print("You choose to run nmap automatically")
-                nmapScan()
+                nmapScan(outfile, target)
     automate()
 
 if __name__ == '__main__':
