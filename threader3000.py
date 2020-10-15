@@ -157,6 +157,7 @@ def main(argv):
     printBMsg = True
     ruNmap = False
 
+
     #################################
     # Command line argument handler #
     #################################
