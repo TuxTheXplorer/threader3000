@@ -31,10 +31,10 @@ sudo ln -s $(pwd)/threader6000.py /usr/local/bin/threader6000
 ```
 
 ## Examples
-`threader6000.py 127.0.0.1`
-`threader6000.py -u 127.0.0.1 -q`
-`threader6000.py -u 127.0.0.1 -t 500 -q`
-`threader6000.py -t 250 -f host_list.txt`
+- `threader6000.py 127.0.0.1`
+- `threader6000.py -u 127.0.0.1 -q`
+- `threader6000.py -u 127.0.0.1 -t 500 -q`
+- `threader6000.py -t 250 -f host_list.txt`
 
 ## FAQ
 
