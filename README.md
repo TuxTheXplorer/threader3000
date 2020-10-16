@@ -1,7 +1,7 @@
 # Threader6000 
 ### Multi-threaded Python Port Scanner with Nmap integration
 
-Threader6000 is an advanced version of threader3000, a script written in Python3 that allows multi-threaded port scanning. The program takes command line arguments to set the target, thread count etc. Optionally a list of hosts can be specified as well. Giving it a list will iterate through the IP addresses found in the list and do a portscan + nmap service detection on all of them. A full port scan can take as little as 15 seconds, but at max should take less than 1 minute 30 seconds depending on your internet connection.
+Threader6000 is an advanced version of threader3000, a script written in Python3 that allows multi-threaded port scanning. The program takes command line arguments to set the target, thread count etc. Optionally a list of hosts can be specified as well. Giving it a list will iterate through the IP addresses found in the list and do a portscan + nmap service detection on all of them. A full port scan can take as little as 15 seconds, but at max should take less than 1 minute 30 seconds depending on your internet connection. The original author of Threader3000 is [The Mayor](https://github.com/dievus).
 
 ## Requirements
 Python3 must be installed on your system in order to function
