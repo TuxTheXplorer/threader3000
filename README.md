@@ -48,6 +48,8 @@ Usage: threader6000.py <IP> or -f hosts.txt [options]
 - `threader6000.py -u 127.0.0.1 -t 500 -q`
 - `threader6000.py -t 250 -f host_list.txt`
 
+![Example](Example.png)
+
 ## FAQ
 
 **Can I use this tool to scan Facebook or other websites I don't have permission to scan?**
