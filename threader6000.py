@@ -61,7 +61,9 @@ def readFromFile(filename, tc):
             portlist = portscan(target, threadCount)
             print("Running nmap for", target)
             outfile = "nmap -p{ports} -sV -sC -Pn -T4 -oA {ip} {ip}".format(ports=",".join(portlist), ip=target)
-            #nmapScan(outfile, target)
+            nmapScan(outfile, target)
+            os.chdir("../")
+            print("\n")
 
 
 ###########################################
@@ -142,7 +144,6 @@ def nmapScan(outfile, target):
        #total1 = t3 - t1
        print("-" * 60)
        #print("Combined scan completed in "+str(total1))
-       sys.exit(0)
     except FileExistsError as e:
        print(e)
        sys.exit()
