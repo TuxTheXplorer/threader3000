@@ -60,7 +60,7 @@ def readFromFile(filename, tc):
             print("Starting portscan for", target)
             portlist = portscan(target, threadCount)
             print("Running nmap for", target)
-            outfile = "nmap -p{ports} -sV -sC -Pn -T4 -oA {ip} {ip}".format(ports=",".join(portlist), ip=target)
+            outfile = "nmap -p{ports} -sV -sC -Pn -T4 -oN {ip} {ip}".format(ports=",".join(portlist), ip=target)
             nmapScan(outfile, target)
             os.chdir("../")
             print("\n")
@@ -133,8 +133,6 @@ def portscan(target, threadCount):
 
 def nmapScan(outfile, target):
     """Creates output folder and runs Nmap"""
-    # TODO: 
-    # - Handle folder creation for multiple targets
     try:
        print(outfile)
        os.mkdir(target)
@@ -238,9 +236,9 @@ def main(argv):
     if not ruNmap:
         print("\nThreader6000 recommends the following Nmap scan:")
         print("*" * 60)
-        print("nmap -p{ports} -sV -sC -T4 -Pn -oA {ip} {ip}".format(ports=",".join(discovered_ports), ip=target))
+        print("nmap -p{ports} -sV -sC -T4 -Pn -oN {ip} {ip}".format(ports=",".join(discovered_ports), ip=target))
         print("*" * 60)
-    outfile = "nmap -p{ports} -sV -sC -Pn -T4 -oA {ip} {ip}".format(ports=",".join(discovered_ports), ip=target)
+    outfile = "nmap -p{ports} -sV -sC -Pn -T4 -oN {ip} {ip}".format(ports=",".join(discovered_ports), ip=target)
     #t3 = datetime.now()
     #total1 = t3 - t1
 
