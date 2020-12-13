@@ -8,17 +8,6 @@ Python3 must be installed on your system in order to function
 Pip3 for installation via PyPi repository
 
 ## Installation
-**Installation via Pip (Not yet available - please install via git)**
-
-```bash 
-pip3 install threader6000
-```
-
-Run by typing:
-```bash
-./threader6000
-```
-
 **Install via Git**
 ```bash
 git clone https://github.com/TuxTheXplorer/threader3000.git
